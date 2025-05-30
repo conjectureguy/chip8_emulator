@@ -1,4 +1,4 @@
-#include "Chip8.h"
+#include "../include/Chip8.h"
 
 #include <chrono>
 #include <cstring>

@@ -6,4 +6,4 @@ set(CMAKE_CXX_STANDARD 20)
 add_executable(chip8_emulator
         src/Main.cpp
         src/Chip8.cpp
-        src/Chip8.h)
+        include/Chip8.h)
