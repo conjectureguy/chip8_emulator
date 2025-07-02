@@ -63,7 +63,8 @@ void Chip8::Cycle() {
 	opcode = (memory[pc] << 8) | memory[pc + 1];
 	pc += 2;
 
-	int opcode_msb_nibble = (opcode & 0xF000) >> 12;
+	int opcode_msb_nibble = (opcode & 0xFFFF) >> 12;
+	// std::cout << opcode << std::endl;
 
 	switch (opcode_msb_nibble) {
 		case 0:
@@ -71,10 +72,11 @@ void Chip8::Cycle() {
 				case 0x00E0:
 					OP_00E0();
 					break;
-				case 0x0E00:
+				case 0x00EE:
 					OP_00EE();
 					break;
-				default:
+			default:
+					std:: cerr << opcode_msb_nibble << std::endl;
 					std::cerr << "Unknown opcode: " << opcode << std::endl;
 					break;
 			}
@@ -100,7 +102,7 @@ void Chip8::Cycle() {
 		case 7:
 			OP_7xkk();
 			break;
-		case 8:
+		case 8: {
 			int val = opcode & 0x000F;
 			switch (val) {
 				case 0:
@@ -131,10 +133,12 @@ void Chip8::Cycle() {
 					OP_8xyE();
 					break;
 				default:
+					std:: cerr << opcode_msb_nibble << std::endl;
 					std::cerr << "Unknown opcode: " << opcode << std::endl;
 					break;
 			}
 			break;
+		}
 		case 9:
 			OP_9xy0();
 			break;
@@ -150,8 +154,8 @@ void Chip8::Cycle() {
 		case 13:
 			OP_Dxyn();
 			break;
-		case 14:
-			val = opcode & 0x00FF;
+		case 14: {
+			int val = opcode & 0x00FF;
 			switch (val) {
 				case 0x9E:
 					OP_Ex9e();
@@ -160,47 +164,51 @@ void Chip8::Cycle() {
 					OP_ExA1();
 					break;
 				default:
+					std:: cerr << opcode_msb_nibble << std::endl;
 					std::cerr << "Unknown opcode: " << opcode << std::endl;
 					break;
 			}
 			break;
-		case 15:
-			val = opcode & 0x00FF;
+		}
+		case 15: {
+			int val = opcode & 0x00FF;
 			switch (val) {
 				case 0x07:
 					OP_Fx07();
-                    break;
-                case 0x0A:
+					break;
+				case 0x0A:
 					OP_Fx0A();
-                    break;
-                case 0x15:
+					break;
+				case 0x15:
 					OP_Fx15();
-                    break;
-                case 0x18:
+					break;
+				case 0x18:
 					OP_Fx18();
-                    break;
-                case 0x1E:
+					break;
+				case 0x1E:
 					OP_Fx1E();
-                    break;
-                case 0x29:
+					break;
+				case 0x29:
 					OP_Fx29();
-                    break;
-                case 0x33:
+					break;
+				case 0x33:
 					OP_Fx33();
-                    break;
-                case 0x55:
+					break;
+				case 0x55:
 					OP_Fx55();
-                    break;
-                case 0x65:
+					break;
+				case 0x65:
 					OP_Fx65();
-                    break;
-                default:
+					break;
+				default:
+					std:: cerr << opcode_msb_nibble << std::endl;
 					std::cerr << "Unknown opcode: " << opcode << std::endl;
-                    break;
+					break;
 			}
 			break;
+		}
 		default:
-			std::cerr << "Unknown opcode: " << opcode << std::endl;
+			std::cerr << "Unknown opcode nibble: " << opcode_msb_nibble << std::endl;
 			break;
 	}
 
@@ -216,7 +224,8 @@ void Chip8::Cycle() {
 
 // Instruction functions
 
-void Chip8::OP_NULL() {}
+void Chip8::OP_NULL() {
+}
 
 void Chip8::OP_00E0() {
 	// Clear the display
@@ -423,6 +432,8 @@ void Chip8::OP_Cxkk() {
 
 void Chip8::OP_Dxyn() {
 	// Display n-byte sprite starting at memory location I at (Vx, Vy), set VF = collision
+	static int drawCount = 0;
+	// std::cout << "Drawing " << drawCount++ << std::endl;
 	uint8_t Vx = (opcode & 0x0F00) >> 8;
 	uint8_t Vy = (opcode & 0x00F0) >> 4;
 	uint8_t height = opcode & 0x000F;
@@ -439,6 +450,7 @@ void Chip8::OP_Dxyn() {
 			uint32_t* screenPixel = &video[(yPos + row) * VIDEO_WIDTH + (xPos + col)];
 
 			if (spritePixel) {
+				// std::cout << "ON\n";
 				if (*screenPixel == 0xFFFFFFFF)
 					registers[0xF] = 1;
 
@@ -483,6 +495,7 @@ void Chip8::OP_Fx0A() {
 		if (keypad[i]) {
 			found = true;
 			registers[Vx] = i;
+			// std::cout << "Keypress: " << i << std::endl;
 			break;
 		}
 	}
